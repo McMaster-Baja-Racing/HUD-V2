@@ -1,0 +1,8 @@
+#line 1 "C:\\Users\\Ariel\\Documents\\Dev\\HudV2\\.vscode\\arduino.json"
+{
+    "configuration": "PSRAM=opi,FlashMode=qio,FlashSize=16M,LoopCore=1,EventsCore=1,USBMode=hwcdc,CDCOnBoot=cdc,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,PartitionScheme=fatflash,CPUFreq=240,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
+    "board": "esp32:esp32:tamc_termod_s3",
+    "programmer": "esptool",
+    "output": "build",
+    "sketch": "HudV2.ino"
+}
