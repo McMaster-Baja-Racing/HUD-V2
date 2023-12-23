@@ -528,28 +528,33 @@ void serialOut(const __FlashStringHelper *item, int32_t v, uint32_t d, bool clea
 void printnice(const char *item, long int v)
 #else
 void printnice(const __FlashStringHelper *item, long int v)
-#endif {
+#endif
+{
   gfx->setTextSize(tsb);
   gfx->setTextColor(CYAN);
   gfx->print(item);
 
   gfx->setTextSize(tsc);
   gfx->setTextColor(YELLOW);
-  if (v < 0) {
+  if (v < 0)
+  {
     gfx->println(F("      N / A"));
   }
-  else {
+  else
+  {
     char str[32] = {0};
 #ifdef RTL8722DM
     sprintf(str, "%d", (int)v);
 #else
     sprintf(str, "%ld", v);
 #endif
-    for (char *p = (str + strlen(str)) - 3; p > str; p -= 3) {
+    for (char *p = (str + strlen(str)) - 3; p > str; p -= 3)
+    {
       memmove(p + 1, p, strlen(p) + 1);
       *p = ',';
     }
-    while (strlen(str) < ds) {
+    while (strlen(str) < ds)
+    {
       memmove(str + 1, str, strlen(str) + 1);
       *str = ' ';
     }

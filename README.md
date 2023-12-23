@@ -6,3 +6,14 @@ Utilizes the ESP32-S3 using the TAMC Termod S3 board. Utilizes ST7701 driver and
 
 ## Library
 We use the Arduino GFX library together with LVGL to control the screens display.
+
+## Setup
+- Install all libraries
+ - Install LVGL, then copy the `lv_conf_example.h` from the repository into the folder `Arduino > libraries`. It should be in the same directory as the lvgl library itself. Rename this file to `lv_conf.h`.
+ - Install Arduino_GFX
+- Install board
+- Under Tools
+ - Set "PSRAM" to "OPI PSRAM"
+ - Set "Flash size" to "16MB"
+ - Set "Partition Scheme" to "16 MB Flash (3MB App / 9MB FATFS)
+
