@@ -24,52 +24,30 @@ Arduino_RGB_Display *gfx = new Arduino_RGB_Display(
   Screen_Width /* width */, Screen_Height /* height */, rgbpanel, 0 /* rotation */, true /* auto_flush */,
   bus, GFX_NOT_DEFINED /* RST */, st7701_type7_init_operations, sizeof(st7701_type7_init_operations));
 
-void my_log_cb( const char * dsc)
-{
+// Logging callback function
+void my_log_cb( const char * dsc) {
   Serial.print(dsc);
   Serial.print("\n");
 }
 
+// Buffer is a tenth of the screen size
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[ Screen_Width * Screen_Height / 10 ];
 
+// This function draws the buffer to the screen repeatedly
 void my_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p ) {
-    // Serial.println("Flushing begin");
+
     uint32_t w = ( area->x2 - area->x1 + 1 );
     uint32_t h = ( area->y2 - area->y1 + 1 );
 
-Serial.println("NONZERO VALUES!!!! ");
-  for(int i = 0; i < sizeof(color_p)/sizeof(color_p[0]); i++) {
-    if((color_p+i)->full != 0) {
-        Serial.println((color_p+i)->full, BIN);
-    }
-  }
-    //gfx->draw16bitRGBBitmap(0, 0, epd_bitmap_rainbow, Screen_Width, Screen_Height);
     gfx->draw16bitRGBBitmap(area->x1, area->y1, ( uint16_t * )&color_p->full, w, h);
-    //Serial.println("GFX Done");
 
-    lv_disp_flush_ready(disp_drv);
-    Serial.println("Flush");
-    Serial.print("X1: ");
-    Serial.print(area->x1);
-    Serial.print(", X2: ");
-    Serial.print(area->x2);
-    Serial.print(", Y1: ");
-    Serial.print(area->y1);
-    Serial.print(", Y2: ");
-    Serial.print(area->y2);
-    Serial.print(", w: ");
-    Serial.print(w);
-    Serial.print(", h: ");
-    Serial.print(h);
+    lv_disp_flush_ready( disp_drv );
 }
-
-
-
 
 void setup() {
 
-  Serial.begin( 115200 ); /* prepare for possible serial debug */
+  Serial.begin( 115200 ); 
 
   while(!Serial){}
 
@@ -81,23 +59,26 @@ void setup() {
 
   lv_init();
 
+  // Runs logging
   lv_log_register_print_cb(my_log_cb);
 
+  // Begin GFX and backlight
   gfx->begin();
   gfx->fillScreen(BLACK);
   pinMode(LCD_BL, OUTPUT);
   digitalWrite(LCD_BL, HIGH);
 
+  // Test GFX
   delay(1000);
   gfx->fillScreen(MAGENTA);
   delay(1000);
   gfx->draw16bitRGBBitmap(0, 0, epd_bitmap_rainbow, Screen_Width, Screen_Height);
   delay(2000);
 
-
+  // Initialize buffer
   lv_disp_draw_buf_init( &draw_buf, buf, NULL, Screen_Width * Screen_Height / 10 );
 
-  /*Initialize the display*/
+  // Initialize the display with LVGL
   static lv_disp_drv_t disp_drv;
   lv_disp_drv_init( &disp_drv );
   /*Change the following line to your display resolution*/
@@ -106,25 +87,17 @@ void setup() {
   disp_drv.flush_cb = my_disp_flush;
   disp_drv.draw_buf = &draw_buf;
   lv_disp_drv_register( &disp_drv );
-
-  /*Initialize the (dummy) input device driver*/
-    // static lv_indev_drv_t indev_drv;
-    // lv_indev_drv_init( &indev_drv );
-    // indev_drv.type = LV_INDEV_TYPE_POINTER;
-    // indev_drv.read_cb = my_touchpad_read;
-    // lv_indev_drv_register( &indev_drv );
   
-    /* Create simple label */
-    lv_obj_t *label = lv_label_create( lv_scr_act() );
-    lv_label_set_text( label, "Hello Ardino and LVGL!");
-    lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
+  // Create a simple label
+  lv_obj_t *label = lv_label_create( lv_scr_act() );
+  lv_label_set_text( label, "Hello Arduino and LVGL!");
+  lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
 
   Serial.println( "Setup done" );
 }
 
 void loop() {
-    //Serial.println("Hey buddy");
-    lv_timer_handler(); /* let the GUI do its work */
+    lv_timer_handler(); // let the GUI do its work 
     delay( 5 );
 }
 
