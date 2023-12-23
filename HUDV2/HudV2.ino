@@ -1,8 +1,13 @@
 
 #include "Arduino.h"
-#include "Pinout.h"
-#include <Arduino_GFX_Library.h>
 #include <lvgl.h>
+#include "Pinout.h"
+#include "TPMS.h"
+#include <Arduino_GFX_Library.h>
+
+
+
+
 
 
 
@@ -50,6 +55,13 @@ String LVGL_Arduino = "Hello Arduino! ";
 LVGL_Arduino += String('V') + lv_version_major() + "." + lv_version_minor() + "." + lv_version_patch();
 
 
+BLEDevice::init("");
+pBLEScan = BLEDevice::getScan(); //create new scan
+pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
+pBLEScan->setInterval(100);
+pBLEScan->setWindow(99);  // less or equal setInterval value
+
 gfx->begin();
 gfx->fillScreen(BLACK);
 pinMode(LCD_BL, OUTPUT);
@@ -59,9 +71,8 @@ Serial.println("lvgl init");
 lv_init();
 
 disp_draw_buf = (lv_color_t *)heap_caps_malloc(sizeof(lv_color_t) * TFT_Width * 40, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-if (!disp_draw_buf)
-{
-Serial.println("LVGL disp_draw_buf allocate failed!");
+if (!disp_draw_buf){
+    Serial.println("LVGL disp_draw_buf allocate failed!");
 }
 else{
     Serial.println("LVGL disp_draw_buf allocate OK!");
@@ -81,6 +92,36 @@ else{
     lv_label_set_text( label, LVGL_Arduino.c_str() );
     lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
 
+    //Create a basic object to hold the tpms labels
+    lv_obj_t *tpmsLabels = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(tpmsLabels, 128, 64);
+    lv_obj_align(tpmsLabels, LV_ALIGN_RIGHT_MID, 0, 0);
+
+    //Use the tpms label array to create labels for each tire
+    for (int i = 0; i < 4; i++)
+    {
+        tpmsLabel[i] = lv_label_create(tpmsLabels);
+        lv_label_set_text(tpmsLabel[i],  "N/A");
+        //align the labels to each cornor of the tpmslabels object
+        switch (i)
+        {
+        case 0:
+            lv_obj_align(tpmsLabel[i], LV_ALIGN_OUT_TOP_LEFT, 0, 0);
+            break;
+        case 1:
+            lv_obj_align(tpmsLabel[i], LV_ALIGN_OUT_TOP_RIGHT, 0, 0);
+            break;
+        case 2:
+            lv_obj_align(tpmsLabel[i], LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+            break;
+        case 3:
+            lv_obj_align(tpmsLabel[i], LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 0);
+            break;
+        default:
+            break;
+        }
+    }
+
     Serial.println("Setup done");
 }
 
@@ -91,6 +132,8 @@ else{
 
 void loop()
 {
-  lv_timer_handler();
-  delay(5);
+    BLEScanResults foundDevices = pBLEScan->start(scanTime, false);
+    pBLEScan->clearResults();   // delete results fromBLEScan buffer to release memory
+    lv_timer_handler();
+    delay(5);
 }
